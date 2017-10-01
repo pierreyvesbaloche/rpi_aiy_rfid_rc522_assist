@@ -24,6 +24,7 @@ class RFIDHelper(object):
         """
         self.logger = logging.getLogger(self.__class__.__name__)
         self.initialised = False
+        self.activated = False
         self.wake_event = threading.Event()
         self.done_event = threading.Event()
         self.runner = threading.Thread(target=self.do, args=(self.wake_event, self.done_event,))
@@ -35,6 +36,9 @@ class RFIDHelper(object):
         Activate the helper.
         :return: None
         """
+        if self.activated:
+            return
+
         if not self.initialised:
             self.logger.log(logging.DEBUG, "Starting !")
             self.runner.start()
@@ -44,17 +48,29 @@ class RFIDHelper(object):
         self.runner.do_run = True
         self.wake_event.set()
         self.logger.log(logging.DEBUG, "Activated !")
+        self.activated = True
+
+    def is_activated(self):
+        """
+        Return the status of the helper.
+        :return: False or True
+        """
+        return self.activated
 
     def deactivate(self):
         """
         Deactivate the helper.
         :return: None
         """
+        if not self.activated:
+            return
+
         self.logger.log(logging.DEBUG, "Deactivating !")
         self.runner.do_run = False
         self.done_event.wait()
         self.clear()
         self.logger.log(logging.DEBUG, "Deactivated !")
+        self.activated = False
 
     def terminate(self):
         """
@@ -71,6 +87,7 @@ class RFIDHelper(object):
             except RuntimeError:
                 pass
         self.logger.log(logging.DEBUG, "Terminated !")
+        self.activated = False
         self.rc522.cleanup()
 
     def __str__(self):
