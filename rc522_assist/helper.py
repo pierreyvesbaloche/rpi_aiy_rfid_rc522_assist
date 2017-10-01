@@ -120,9 +120,9 @@ class RFIDHelper(object):
 def main():
     helper = RFIDHelper()
     helper.activate()
-    wait_show = 10
+    wait_read = 10
     wait_tempo = 2
-    time.sleep(wait_show)
+    time.sleep(wait_read)
     helper.deactivate()
     time.sleep(wait_tempo)
     helper.terminate()
